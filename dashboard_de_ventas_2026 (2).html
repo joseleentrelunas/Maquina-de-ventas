@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusSales 2026 - Dashboard Interactivo de Métricas</title>
+    <!-- Tailwind CSS for clean and modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for interactive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        trend: {
+                            cyan: '#06B6D4',
+                            violet: '#8B5CF6',
+                            emerald: '#10B981',
+                            amber: '#F59E0B',
+                            rose: '#F43F5E',
+                            darkBg: '#0F172A',
+                            cardBg: '#1E293B',
+                            cardLight: '#FFFFFF',
+                            bgLight: '#F8FAFC'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .glass-card {
+            backdrop-filter: blur(12px);
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+            border-color: #06B6D4;
+        }
+    </style>
+</head>
+<body class="h-full bg-trend-bgLight dark:bg-trend-darkBg text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300">
+
+    <div class="flex h-full overflow-hidden">
+        
+        <aside id="sidebar" class="w-72 bg-white dark:bg-trend-cardBg border-r border-slate-200 dark:border-slate-800 flex flex-col z-20 transition-all duration-300 -translate-x-full md:translate-x-0 fixed md:static inset-y-0 left-0 shadow-lg md:shadow-none">
+            <div class="p-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-trend-cyan to-trend-violet flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/20">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <span class="text-lg font-bold bg-gradient-to-r from-trend-cyan to-trend-violet bg-clip-text text-transparent">NexusSales</span>
+                        <span class="block text-xs font-medium text-slate-400">Edición 2026</span>
+                    </div>
+                </div>
+                <button id="closeSidebar" class="md:hidden text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" onclick="playSound('click')">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Vertical Navigation Links -->
+            <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
+                <div class="text-xs font-bold text-slate-400 px-3 uppercase tracking-wider mb-2">Menú Principal</div>
+                
+                <button onclick="switchView('general', this)" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-gradient-to-r from-trend-cyan/10 to-trend-violet/10 text-trend-cyan font-semibold transition-all hover:shadow-md glow-hover">
+                    <i class="fa-solid fa-house-chimney w-5 text-trend-cyan"></i>
+                    <span class="text-sm">Dashboard General</span>
+                </button>
+                
+                <button onclick="switchView('resumen', this)" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all hover:text-trend-cyan glow-hover">
+                    <i class="fa-solid fa-wallet w-5 text-trend-violet"></i>
+                    <span class="text-sm">Resumen de Ventas</span>
+                </button>
+
+                <button onclick="switchView('equipos', this)" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all hover:text-trend-cyan glow-hover">
+                    <i class="fa-solid fa-user-gear w-5 text-trend-emerald"></i>
+                    <span class="text-sm">Rendimiento Equipos</span>
+                </button>
+
+                <button onclick="switchView('leads', this)" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all hover:text-trend-cyan glow-hover">
+                    <i class="fa-solid fa-filter-circle-dollar w-5 text-trend-amber"></i>
+                    <span class="text-sm">Conversión de Leads</span>
+                </button>
+
+                <div class="text-xs font-bold text-slate-400 px-3 uppercase tracking-wider mt-6 mb-2">Analítica Avanzada</div>
+
+                <button onclick="switchView('clientes', this)" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all hover:text-trend-cyan glow-hover">
+                    <i class="fa-solid fa-users w-5 text-trend-cyan"></i>
+                    <span class="text-sm">Análisis de Clientes</span>
+                </button>
+
+                <button onclick="switchView('canales', this)" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all hover:text-trend-cyan glow-hover">
+                    <i class="fa-solid fa-network-wired w-5 text-trend-violet"></i>
+                    <span class="text-sm">Canales Adquisición</span>
+                </button>
+
+                <button onclick="switchView('financieras', this)" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all hover:text-trend-cyan glow-hover">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-trend-emerald"></i>
+                    <span class="text-sm">Métricas Financieras</span>
+                </button>
+
+                <button onclick="switchView('proyecciones', this)" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all hover:text-trend-cyan glow-hover">
+                    <i class="fa-solid fa-chart-pie w-5 text-trend-amber"></i>
+                    <span class="text-sm">Proyecciones 2026</span>
+                </button>
+            </nav>
+
+            <!-- User Profile Widget in Sidebar -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50">
+                    <img src="https://placehold.co/40x40/06B6D4/FFFFFF?text=AM" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-trend-cyan">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold truncate">Ana Martínez</p>
+                        <p class="text-xs text-slate-400 truncate">Directora de Ventas</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Top Horizontal Navigation & Header Bar -->
+            <header class="h-20 bg-white/80 dark:bg-trend-cardBg/80 glass-card border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 z-10">
+                <div class="flex items-center space-x-4">
+                    <button id="openSidebar" class="md:hidden text-slate-600 dark:text-slate-300 focus:outline-none" onclick="playSound('click')">
+                        <i class="fa-solid fa-bars-staggered text-xl"></i>
+                    </button>
+                    <div>
+                        <h1 id="viewTitle" class="text-xl md:text-2xl font-bold tracking-tight">Dashboard General</h1>
+                        <p id="viewSubtitle" class="text-xs text-slate-500 dark:text-slate-400">Vista consolidada de indicadores y rendimiento global 2026</p>
+                    </div>
+                </div>
+
+                <!-- Horizontal Navigation Buttons -->
+                <div class="hidden xl:flex items-center space-x-2 bg-slate-100 dark:bg-slate-900/60 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <button onclick="switchView('general', this)" class="horiz-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-trend-cyan shadow-sm transition-all">General</button>
+                    <button onclick="switchView('resumen', this)" class="horiz-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-trend-cyan transition-all">Resumen</button>
+                    <button onclick="switchView('equipos', this)" class="horiz-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-trend-cyan transition-all">Equipos</button>
+                    <button onclick="switchView('leads', this)" class="horiz-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-trend-cyan transition-all">Leads</button>
+                    <button onclick="switchView('clientes', this)" class="horiz-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-trend-cyan transition-all">Clientes</button>
+                    <button onclick="switchView('canales', this)" class="horiz-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-trend-cyan transition-all">Canales</button>
+                    <button onclick="switchView('financieras', this)" class="horiz-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-trend-cyan transition-all">Finanzas</button>
+                    <button onclick="switchView('proyecciones', this)" class="horiz-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-trend-cyan transition-all">Proyecciones</button>
+                </div>
+
+                <!-- Header Actions -->
+                <div class="flex items-center space-x-3">
+                    <div class="hidden sm:flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl text-sm font-medium">
+                        <i class="fa-regular fa-calendar text-trend-cyan"></i>
+                        <span id="currentDateDisplay">Cargando...</span>
+                    </div>
+
+                    <button id="themeToggle" onclick="playSound('click')" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors glow-hover">
+                        <i id="themeIcon" class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <button onclick="playSound('click'); showNotification('Reporte oficial exportado con éxito.')" class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-trend-cyan to-trend-violet text-white px-4 py-2.5 rounded-xl font-semibold shadow-lg shadow-cyan-500/20 hover:opacity-95 transition-all">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Exportar</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+                
+                <!-- GLOBAL FILTERS & GRAPH TYPE SELECTOR BAR -->
+                <div class="bg-white dark:bg-trend-cardBg p-4 md:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <!-- Client & User Selector Panel -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-filter mr-1 text-trend-cyan"></i> Filtrar Clientes:</span>
+                        <label class="inline-flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs font-medium">
+                            <input type="checkbox" checked onchange="playSound('click'); toggleClientFilter('TechCorp Global', this.checked)" class="rounded text-trend-cyan focus:ring-trend-cyan">
+                            <span>TechCorp Global</span>
+                        </label>
+                        <label class="inline-flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs font-medium">
+                            <input type="checkbox" checked onchange="playSound('click'); toggleClientFilter('Lucia Fernandez', this.checked)" class="rounded text-trend-violet focus:ring-trend-violet">
+                            <span>Lucia Fernandez</span>
+                        </label>
+                        <label class="inline-flex items-center space-x-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs font-medium">
+                            <input type="checkbox" checked onchange="playSound('click'); toggleClientFilter('Solaris Systems', this.checked)" class="rounded text-trend-emerald focus:ring-trend-emerald">
+                            <span>Solaris Systems</span>
+                        </label>
+                    </div>
+
+                    <!-- Chart Type Selector (Bar, Line, Pie) -->
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-chart-simple mr-1 text-trend-violet"></i> Tipo Gráfico:</span>
+                        <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-medium">
+                            <button onclick="playSound('click'); changeGlobalChartType('line')" id="chartType-line" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-trend-cyan font-semibold shadow-sm transition-all">Líneas</button>
+                            <button onclick="playSound('click'); changeGlobalChartType('bar')" id="chartType-bar" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-all">Barras</button>
+                            <button onclick="playSound('click'); changeGlobalChartType('pie')" id="chartType-pie" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-all">Quesito</button>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- VIEW 1: GENERAL -->
+                <div id="view-general" class="space-y-6 dashboard-view">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                        <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-trend-cyan transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-sm font-medium text-slate-500">Ventas Globales</span>
+                                <div class="w-10 h-10 rounded-xl bg-trend-cyan/10 text-trend-cyan flex items-center justify-center font-bold"><i class="fa-solid fa-wallet"></i></div>
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-extrabold">$142,850</h3>
+                            <p class="text-xs text-trend-emerald mt-2 font-semibold"><i class="fa-solid fa-arrow-trend-up"></i> +18.4% vs mes anterior</p>
+                        </div>
+                        <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-trend-violet transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-sm font-medium text-slate-500">Clientes Activos</span>
+                                <div class="w-10 h-10 rounded-xl bg-trend-violet/10 text-trend-violet flex items-center justify-center font-bold"><i class="fa-solid fa-user-group"></i></div>
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-extrabold">3,892</h3>
+                            <p class="text-xs text-trend-emerald mt-2 font-semibold"><i class="fa-solid fa-arrow-trend-up"></i> +340 nuevos</p>
+                        </div>
+                        <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-trend-amber transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-sm font-medium text-slate-500">Tasa de Conversión</span>
+                                <div class="w-10 h-10 rounded-xl bg-trend-amber/10 text-trend-amber flex items-center justify-center font-bold"><i class="fa-solid fa-bullseye"></i></div>
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-extrabold">6.42%</h3>
+                            <p class="text-xs text-trend-rose mt-2 font-semibold"><i class="fa-solid fa-arrow-trend-down"></i> -0.8% ajuste</p>
+                        </div>
+                        <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:border-trend-emerald transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-sm font-medium text-slate-500">Beneficio Neto</span>
+                                <div class="w-10 h-10 rounded-xl bg-trend-emerald/10 text-trend-emerald flex items-center justify-center font-bold"><i class="fa-solid fa-chart-pie"></i></div>
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-extrabold">$54,200</h3>
+                            <p class="text-xs text-trend-emerald mt-2 font-semibold"><i class="fa-solid fa-arrow-trend-up"></i> Margen 38%</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h2 class="text-lg font-bold">Gráfico Principal - Dashboard General</h2>
+                                <p class="text-xs text-slate-500">Evolución mensual de ingresos y ventas activas</p>
+                            </div>
+                        </div>
+                        <div class="relative w-full h-[350px]">
+                            <canvas id="chartGeneral"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: RESUMEN -->
+                <div id="view-resumen" class="space-y-6 dashboard-view hidden">
+                    <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h2 class="text-lg font-bold mb-2">Desglose Analítico de Resumen de Ventas</h2>
+                        <p class="text-sm text-slate-500 mb-6">Comparativa detallada de transacciones cerradas, pendientes y reembolsos del periodo.</p>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="relative w-full h-[320px]">
+                                <canvas id="chartResumenA"></canvas>
+                            </div>
+                            <div class="relative w-full h-[320px]">
+                                <canvas id="chartResumenB"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: EQUIPOS -->
+                <div id="view-equipos" class="space-y-6 dashboard-view hidden">
+                    <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h2 class="text-lg font-bold mb-2">Rendimiento por Equipos de Ventas (Norte, Sur, Este, Oeste)</h2>
+                        <p class="text-sm text-slate-500 mb-6">Productividad individual y cumplimiento de cuotas trimestrales por cada squad comercial.</p>
+                        <div class="relative w-full h-[350px]">
+                            <canvas id="chartEquipos"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 4: LEADS -->
+                <div id="view-leads" class="space-y-6 dashboard-view hidden">
+                    <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h2 class="text-lg font-bold mb-2">Embudo de Conversión de Leads</h2>
+                        <p class="text-sm text-slate-500 mb-6">Análisis de etapas desde prospecto frío, cualificación, propuesta y cierre definitivo.</p>
+                        <div class="relative w-full h-[350px]">
+                            <canvas id="chartLeads"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 5: CLIENTES -->
+                <div id="view-clientes" class="space-y-6 dashboard-view hidden">
+                    <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h2 class="text-lg font-bold mb-2">Segmentación y Comportamiento de Clientes</h2>
+                        <p class="text-sm text-slate-500 mb-6">Valor de tiempo de vida del cliente (LTV) y coste de adquisición (CAC).</p>
+                        <div class="relative w-full h-[350px]">
+                            <canvas id="chartClientes"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 6: CANALES -->
+                <div id="view-canales" class="space-y-6 dashboard-view hidden">
+                    <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h2 class="text-lg font-bold mb-2">Rendimiento de Canales de Adquisición</h2>
+                        <p class="text-sm text-slate-500 mb-6">Impacto de campañas de pago, tráfico orgánico, referidos y canales directos.</p>
+                        <div class="relative w-full h-[350px]">
+                            <canvas id="chartCanales"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 7: FINANCIERAS -->
+                <div id="view-financieras" class="space-y-6 dashboard-view hidden">
+                    <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h2 class="text-lg font-bold mb-2">Salud y Métricas Financieras 2026</h2>
+                        <p class="text-sm text-slate-500 mb-6">Flujo de caja, EBITDA, liquidez y márgenes operacionales auditados.</p>
+                        <div class="relative w-full h-[350px]">
+                            <canvas id="chartFinancieras"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 8: PROYECCIONES -->
+                <div id="view-proyecciones" class="space-y-6 dashboard-view hidden">
+                    <div class="bg-white dark:bg-trend-cardBg p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h2 class="text-lg font-bold mb-2">Proyecciones de Crecimiento y Escenarios 2026</h2>
+                        <p class="text-sm text-slate-500 mb-6">Modelados predictivos basados en IA para el cierre fiscal anual.</p>
+                        <div class="relative w-full h-[350px]">
+                            <canvas id="chartProyecciones"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-trend-cardBg rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 dark:border-slate-800 gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold">Transacciones Recientes del Periodo</h2>
+                            <p class="text-xs text-slate-500">Registro en vivo filtrado por cliente activo</p>
+                        </div>
+                        <div class="w-full sm:w-64 relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar transacción..." class="w-full bg-slate-100 dark:bg-slate-800 pl-10 pr-4 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-trend-cyan">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table id="transactionsTable" class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-400 uppercase text-xs tracking-wider border-b border-slate-100 dark:border-slate-800">
+                                    <th class="py-4 px-6 font-semibold">ID</th>
+                                    <th class="py-4 px-6 font-semibold">Cliente</th>
+                                    <th class="py-4 px-6 font-semibold">Categoría</th>
+                                    <th class="py-4 px-6 font-semibold">Fecha</th>
+                                    <th class="py-4 px-6 font-semibold">Monto</th>
+                                    <th class="py-4 px-6 font-semibold">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-sm font-medium">
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" data-client="TechCorp Global">
+                                    <td class="py-4 px-6 text-trend-cyan font-semibold">#TRX-9021</td>
+                                    <td class="py-4 px-6 flex items-center space-x-3"><img src="https://placehold.co/32x32/8B5CF6/FFFFFF?text=TC" class="w-8 h-8 rounded-full"><span>TechCorp Global</span></td>
+                                    <td class="py-4 px-6"><span class="bg-trend-cyan/10 text-trend-cyan px-2.5 py-1 rounded-lg text-xs">SaaS</span></td>
+                                    <td class="py-4 px-6 text-slate-500">Hoy, 16:42</td>
+                                    <td class="py-4 px-6 font-bold">$2,450.00</td>
+                                    <td class="py-4 px-6"><span class="bg-trend-emerald/10 text-trend-emerald px-3 py-1 rounded-full text-xs font-semibold">Completado</span></td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" data-client="Lucia Fernandez">
+                                    <td class="py-4 px-6 text-trend-cyan font-semibold">#TRX-9020</td>
+                                    <td class="py-4 px-6 flex items-center space-x-3"><img src="https://placehold.co/32x32/10B981/FFFFFF?text=LF" class="w-8 h-8 rounded-full"><span>Lucia Fernandez</span></td>
+                                    <td class="py-4 px-6"><span class="bg-trend-violet/10 text-trend-violet px-2.5 py-1 rounded-lg text-xs">Hardware</span></td>
+                                    <td class="py-4 px-6 text-slate-500">Hoy, 14:15</td>
+                                    <td class="py-4 px-6 font-bold">$890.50</td>
+                                    <td class="py-4 px-6"><span class="bg-trend-emerald/10 text-trend-emerald px-3 py-1 rounded-full text-xs font-semibold">Completado</span></td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" data-client="Solaris Systems">
+                                    <td class="py-4 px-6 text-trend-cyan font-semibold">#TRX-9019</td>
+                                    <td class="py-4 px-6 flex items-center space-x-3"><img src="https://placehold.co/32x32/F59E0B/FFFFFF?text=SS" class="w-8 h-8 rounded-full"><span>Solaris Systems</span></td>
+                                    <td class="py-4 px-6"><span class="bg-trend-emerald/10 text-trend-emerald px-2.5 py-1 rounded-lg text-xs">Servicios</span></td>
+                                    <td class="py-4 px-6 text-slate-500">Ayer, 11:20</td>
+                                    <td class="py-4 px-6 font-bold">$5,200.00</td>
+                                    <td class="py-4 px-6"><span class="bg-trend-amber/10 text-trend-amber px-3 py-1 rounded-full text-xs font-semibold">Pendiente</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Notification Component -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-32 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border border-slate-800">
+        <div class="text-trend-cyan text-lg"><i class="fa-solid fa-circle-check"></i></div>
+        <div><p id="toastMessage" class="text-sm font-medium">Notificación del sistema</p></div>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        function playSound(type) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(550, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(750, audioCtx.currentTime + 0.04);
+                    gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.04);
+                }
+            } catch (e) {
+                // AudioContext policy blocked before user interaction
+            }
+        }
+
+        // Current Date Display
+        document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+
+        // Sidebar mobile toggle
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('openSidebar').addEventListener('click', () => sidebar.classList.remove('-translate-x-full'));
+        document.getElementById('closeSidebar').addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
+
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlElement = document.documentElement;
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                themeIcon.className = 'fa-solid fa-moon';
+                localStorage.theme = 'light';
+            } else {
+                htmlElement.classList.add('dark');
+                themeIcon.className = 'fa-solid fa-sun';
+                localStorage.theme = 'dark';
+            }
+            rebuildCharts();
+        });
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+            themeIcon.className = 'fa-solid fa-sun';
+        }
+
+        let currentViewId = 'general';
+        let currentGlobalChartType = 'line';
+        let activeCharts = {};
+
+        const viewMetadata = {
+            'general': { title: 'Dashboard General', subtitle: 'Vista consolidada de indicadores y rendimiento global 2026' },
+            'resumen': { title: 'Resumen de Ventas', subtitle: 'Desglose analítico de transacciones cerradas y pendientes' },
+            'equipos': { title: 'Rendimiento de Equipos', subtitle: 'Productividad y cumplimiento de objetivos por equipos comerciales' },
+            'leads': { title: 'Conversión de Leads', subtitle: 'Embudo de conversión y cualificación de prospectos' },
+            'clientes': { title: 'Análisis de Clientes', subtitle: 'Segmentación, valor de vida (LTV) y retención' },
+            'canales': { title: 'Canales de Adquisición', subtitle: 'Rendimiento de tráfico orgánico, pago y referidos' },
+            'financieras': { title: 'Métricas Financieras', subtitle: 'Flujo de caja, EBITDA y márgenes de beneficio' },
+            'proyecciones': { title: 'Proyecciones 2026', subtitle: 'Modelado predictivo y escenarios de crecimiento anual' }
+        };
+
+        function switchView(viewId, btnElement) {
+            playSound('click');
+            currentViewId = viewId;
+
+            // Hide all views
+            document.querySelectorAll('.dashboard-view').forEach(v => v.classList.add('hidden'));
+            // Show target view
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+
+            // Update Header Titles
+            document.getElementById('viewTitle').textContent = viewMetadata[viewId].title;
+            document.getElementById('viewSubtitle').textContent = viewMetadata[viewId].subtitle;
+
+            // Update Vertical Sidebar buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all hover:text-trend-cyan glow-hover";
+            });
+            if (btnElement && btnElement.classList.contains('nav-btn')) {
+                btnElement.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-gradient-to-r from-trend-cyan/10 to-trend-violet/10 text-trend-cyan font-semibold transition-all shadow-md glow-hover";
+            }
+
+            // Update Horizontal Nav buttons
+            document.querySelectorAll('.horiz-btn').forEach(btn => {
+                btn.className = "horiz-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-trend-cyan transition-all";
+            });
+
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+
+            showNotification(`Cargando vista: ${viewMetadata[viewId].title}`);
+            setTimeout(() => rebuildCharts(), 50);
+        }
+
+        function changeGlobalChartType(type) {
+            currentGlobalChartType = type;
+            ['line', 'bar', 'pie'].forEach(t => {
+                const btn = document.getElementById('chartType-' + t);
+                if (t === type) {
+                    btn.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-trend-cyan font-semibold shadow-sm transition-all";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-all";
+                }
+            });
+            rebuildCharts();
+            showNotification(`Gráfico cambiado a formato ${type === 'line' ? 'líneas' : type === 'bar' ? 'barras' : 'pastel'}.`);
+        }
+
+        function rebuildCharts() {
+            Object.keys(activeCharts).forEach(key => {
+                if (activeCharts[key]) activeCharts[key].destroy();
+            });
+            activeCharts = {};
+
+            const isDark = htmlElement.classList.contains('dark');
+            const gridColor = isDark ? '#334155' : '#f1f5f9';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            const baseOptions = (isPie) => ({
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: isPie, position: 'bottom', labels: { color: textColor, font: { family: 'Inter' } } },
+                    tooltip: { backgroundColor: isDark ? '#1E293B' : '#0F172A', padding: 12, cornerRadius: 10 }
+                },
+                scales: isPie ? {} : {
+                    x: { grid: { color: gridColor }, ticks: { color: textColor, font: { family: 'Inter' } } },
+                    y: { grid: { color: gridColor }, ticks: { color: textColor, font: { family: 'Inter' } } }
+                }
+            });
+
+            const chartTypeToUse = currentGlobalChartType === 'pie' ? 'pie' : currentGlobalChartType;
+            const isPie = currentGlobalChartType === 'pie';
+
+            if (currentViewId === 'general') {
+                const ctx = document.getElementById('chartGeneral').getContext('2d');
+                activeCharts['general'] = new Chart(ctx, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        datasets: [{
+                            label: 'Ventas 2026 ($)',
+                            data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 35000, 32000, 38000, 42000, 45000],
+                            borderColor: '#06B6D4',
+                            backgroundColor: isPie ? ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B', '#F43F5E', '#3B82F6', '#EC4899', '#14B8A6', '#6366F1', '#84CC16', '#A855F7', '#06B6D4'] : 'rgba(6, 182, 212, 0.2)',
+                            borderWidth: isPie ? 0 : 3,
+                            fill: !isPie && currentGlobalChartType === 'line',
+                            tension: 0.4
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+            } else if (currentViewId === 'resumen') {
+                const ctxA = document.getElementById('chartResumenA').getContext('2d');
+                activeCharts['resumenA'] = new Chart(ctxA, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['SaaS', 'Hardware', 'Servicios', 'Consultoría'],
+                        datasets: [{
+                            label: 'Ingresos por Línea',
+                            data: [45000, 28000, 32000, 18000],
+                            backgroundColor: ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B'],
+                            borderColor: '#06B6D4',
+                            borderWidth: isPie ? 0 : 2
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+
+                const ctxB = document.getElementById('chartResumenB').getContext('2d');
+                activeCharts['resumenB'] = new Chart(ctxB, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                        datasets: [{
+                            label: 'Transacciones Completadas',
+                            data: [1200, 1450, 1800, 2100],
+                            backgroundColor: ['#8B5CF6', '#10B981', '#F59E0B', '#06B6D4'],
+                            borderColor: '#8B5CF6',
+                            borderWidth: isPie ? 0 : 2
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+            } else if (currentViewId === 'equipos') {
+                const ctx = document.getElementById('chartEquipos').getContext('2d');
+                activeCharts['equipos'] = new Chart(ctx, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['Equipo Norte', 'Equipo Sur', 'Equipo Este', 'Equipo Oeste', 'Equipo Central'],
+                        datasets: [{
+                            label: 'Cuota Anual Cerrada ($)',
+                            data: [35000, 42000, 29000, 48000, 38000],
+                            backgroundColor: ['#10B981', '#06B6D4', '#8B5CF6', '#F59E0B', '#F43F5E'],
+                            borderColor: '#10B981',
+                            borderWidth: isPie ? 0 : 2
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+            } else if (currentViewId === 'leads') {
+                const ctx = document.getElementById('chartLeads').getContext('2d');
+                activeCharts['leads'] = new Chart(ctx, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['Prospectos', 'Cualificados', 'Propuesta', 'Negociación', 'Cerrados'],
+                        datasets: [{
+                            label: 'Volumen de Leads',
+                            data: [5000, 3200, 1800, 900, 450],
+                            backgroundColor: '#F59E0B',
+                            borderColor: '#F59E0B',
+                            borderWidth: isPie ? 0 : 2
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+            } else if (currentViewId === 'clientes') {
+                const ctx = document.getElementById('chartClientes').getContext('2d');
+                activeCharts['clientes'] = new Chart(ctx, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['TechCorp Global', 'Lucia Fernandez', 'Solaris Systems', 'Nexus Corp', 'Alpha Industries'],
+                        datasets: [{
+                            label: 'LTV Cliente ($)',
+                            data: [25000, 18000, 31000, 14000, 22000],
+                            backgroundColor: '#8B5CF6',
+                            borderColor: '#8B5CF6',
+                            borderWidth: isPie ? 0 : 2
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+            } else if (currentViewId === 'canales') {
+                const ctx = document.getElementById('chartCanales').getContext('2d');
+                activeCharts['canales'] = new Chart(ctx, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['Ads Google', 'Redes Sociales', 'Orgánico SEO', 'Referidos', 'Email Marketing'],
+                        datasets: [{
+                            label: 'Conversiones por Canal',
+                            data: [1400, 950, 2100, 800, 1200],
+                            backgroundColor: '#06B6D4',
+                            borderColor: '#06B6D4',
+                            borderWidth: isPie ? 0 : 2
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+            } else if (currentViewId === 'financieras') {
+                const ctx = document.getElementById('chartFinancieras').getContext('2d');
+                activeCharts['financieras'] = new Chart(ctx, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                        datasets: [{
+                            label: 'Flujo de Caja Neto ($)',
+                            data: [8000, 11000, 9500, 15000, 14000, 18000, 17000, 21000, 19000, 23000, 25000, 28000],
+                            backgroundColor: '#10B981',
+                            borderColor: '#10B981',
+                            borderWidth: isPie ? 0 : 2
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+            } else if (currentViewId === 'proyecciones') {
+                const ctx = document.getElementById('chartProyecciones').getContext('2d');
+                activeCharts['proyecciones'] = new Chart(ctx, {
+                    type: chartTypeToUse,
+                    data: {
+                        labels: ['Q1 2026', 'Q2 2026', 'Q3 2026', 'Q4 2026 (IA Model)', 'Q1 2027 (Est.)'],
+                        datasets: [{
+                            label: 'Escenario Crecimiento ($)',
+                            data: [50000, 75000, 110000, 145000, 180000],
+                            backgroundColor: '#F43F5E',
+                            borderColor: '#F43F5E',
+                            borderWidth: isPie ? 0 : 2
+                        }]
+                    },
+                    options: baseOptions(isPie)
+                });
+            }
+        }
+
+        const activeClients = { 'TechCorp Global': true, 'Lucia Fernandez': true, 'Solaris Systems': true };
+        function toggleClientFilter(clientName, isChecked) {
+            activeClients[clientName] = isChecked;
+            const rows = document.querySelectorAll('#transactionsTable tbody tr');
+            rows.forEach(row => {
+                const rowClient = row.getAttribute('data-client');
+                if (activeClients[rowClient]) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            showNotification(`Filtro actualizado para ${clientName}: ${isChecked ? 'Activo' : 'Oculto'}`);
+        }
+
+        function filterTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#transactionsTable tbody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
+
+        function showNotification(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-32', 'opacity-0'), 3000);
+        }
+
+        window.onload = function() {
+            rebuildCharts();
+        };
+    </script>
+</body>
+</html>
